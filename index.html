@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>批量扣款 · 大黄鹅运营后台</title>
+<title>批量扣款 · 供应链管理后台</title>
 <style>
   :root{
     --blue:#1677ff; --blue-d:#0f62e0; --blue-l:#eef4ff;
@@ -18,22 +18,23 @@
     font:13px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
     -webkit-font-smoothing:antialiased;
   }
-  /* ---------- 页面外壳（仅为原型展示） ---------- */
   .page{min-height:100%;display:flex;flex-direction:column;}
   .page-hd{
-    height:52px;flex:none;display:flex;align-items:center;gap:12px;
-    padding:0 20px;background:#fff;border-bottom:1px solid var(--border-l);
-    font-size:13px;color:var(--text2);
+    height:52px;flex:none;display:flex;align-items:center;gap:10px;
+    padding:0 20px;background:#fff;border-bottom:1px solid var(--border-l);font-size:13px;color:var(--text2);
   }
   .page-hd b{color:var(--text);font-size:14px;}
   .page-hd .sep{color:var(--text4);}
   .page-hd .spacer{flex:1;}
-  .page-bd{flex:1;display:flex;align-items:center;justify-content:center;padding:28px 20px;}
-  .reopen{
-    height:38px;padding:0 18px;border:1px solid var(--blue);border-radius:6px;
-    background:#fff;color:var(--blue);font-size:14px;cursor:pointer;
+  .page-hd .tip{font-size:12px;color:var(--text3);}
+  .page-bd{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;padding:28px 20px;flex-wrap:wrap;}
+  .btn{
+    height:34px;padding:0 18px;border:1px solid var(--border);border-radius:4px;
+    background:#fff;color:var(--text);font-size:13px;cursor:pointer;
   }
-  .reopen:hover{background:var(--blue-l);}
+  .btn:hover{border-color:var(--blue);color:var(--blue);}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .btn.primary:hover{background:var(--blue-d);border-color:var(--blue-d);color:#fff;}
 
   /* ---------- 弹窗 ---------- */
   .mask{
@@ -46,8 +47,6 @@
     background:#fff;border-radius:10px;box-shadow:0 18px 56px rgba(20,30,48,.24);
     display:flex;flex-direction:column;overflow:hidden;
   }
-
-  /* 头部 */
   .dlg-hd{
     height:56px;flex:none;padding:0 20px 0 24px;
     display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-l);
@@ -60,10 +59,8 @@
     color:var(--text3);font-size:20px;line-height:1;cursor:pointer;
   }
   .x:hover{background:#f3f4f6;color:var(--text);}
-
   .dlg-bd{flex:1;overflow:auto;padding:16px 24px 4px;}
 
-  /* 批次级设置条 */
   .typebar{
     display:flex;align-items:center;gap:16px;flex-wrap:wrap;
     background:#f0f6ff;border:1px solid #dbe9ff;border-radius:6px;
@@ -73,48 +70,44 @@
   .radio{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer;}
   .radio input{
     appearance:none;width:16px;height:16px;margin:0;border:1px solid #c2cad8;border-radius:50%;
-    background:#fff;cursor:pointer;position:relative;flex:none;
+    background:#fff;cursor:pointer;flex:none;
   }
   .radio input:checked{border-color:var(--blue);border-width:5px;}
-  .radio input:disabled{border-color:#d8dde6;background:#f4f6f9;cursor:not-allowed;}
-  .radio.dis{color:var(--text4);cursor:not-allowed;}
-  .radio em{font-style:normal;color:var(--text3);font-size:12px;}
 
   /* 表格 */
   .tbl{border:1px solid var(--border-l);border-radius:6px;overflow:hidden;}
   .trow{
     display:grid;
-    grid-template-columns:minmax(196px,1.1fr) 132px minmax(150px,1.25fr) 108px 58px;
+    grid-template-columns:minmax(200px,1.12fr) 132px minmax(140px,1.18fr) 122px 58px;
     align-items:center;gap:8px;padding:0 12px;
   }
-  .thead{
-    height:40px;background:#f4f7fc;border-bottom:1px solid var(--border-l);
-    font-size:12px;color:var(--text2);font-weight:500;
-  }
-  .thead .c,.tbody .c{text-align:center;}
+  .thead{height:40px;background:#f4f7fc;border-bottom:1px solid var(--border-l);font-size:12px;color:var(--text2);font-weight:500;}
+  .thead .c{text-align:center;}
   .tbody .trow{min-height:46px;border-bottom:1px solid var(--border-l);}
-  .tbody .trow:last-child{border-bottom:0;}
   .tbody .trow:hover{background:#fafcff;}
 
+  /* 商户选择器 */
   .mi{min-width:0;}
-  .mi select{
-    width:100%;height:30px;border:1px solid transparent;border-radius:4px;background:transparent;
-    font-size:13px;color:var(--text);cursor:pointer;padding:0 4px;outline:none;
-    text-overflow:ellipsis;
+  .msel{
+    display:flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 8px;
+    border:1px solid transparent;border-radius:4px;cursor:pointer;font-size:13px;min-width:0;
   }
-  .mi select:hover{border-color:var(--border);background:#fff;}
-  .mi select:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 2px rgba(22,119,255,.1);}
+  .msel:hover{border-color:var(--border);background:#fff;}
+  .msel .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .msel .t.ph{color:var(--text4);}
+  .msel .cg{flex:none;color:var(--text4);}
+  .trow.bad .msel{box-shadow:0 0 0 1px var(--red);}
 
+  /* 金额 / 备注 */
   .amt{position:relative;display:flex;align-items:center;}
-  .amt .cur{
-    position:absolute;left:9px;font-size:12px;color:var(--text3);pointer-events:none;
-  }
+  .amt .cur{position:absolute;left:9px;font-size:12px;color:var(--text3);pointer-events:none;}
   .amt input{
     width:100%;height:30px;padding:0 9px 0 22px;border:1px solid var(--border);border-radius:4px;
     font-size:13px;color:var(--text);outline:none;background:#fff;text-align:right;
   }
   .amt input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,119,255,.1);}
   .amt input::placeholder{color:var(--text4);}
+  .trow.bad .amt input{border-color:var(--red);}
 
   .note input{
     width:100%;height:30px;padding:0 9px;border:1px solid transparent;border-radius:4px;
@@ -124,18 +117,17 @@
   .note input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 2px rgba(22,119,255,.1);}
   .note input::placeholder{color:var(--text4);}
 
-  .proof{display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;}
-  .proof .up{
-    color:var(--blue);cursor:pointer;border-bottom:1px dashed transparent;white-space:nowrap;
+  /* 付款凭证 */
+  .proof{min-width:0;}
+  .pbtn{
+    display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 8px;border-radius:4px;
+    font-size:12px;color:var(--blue);cursor:pointer;background:var(--blue-l);white-space:nowrap;
   }
-  .proof .up:hover{border-bottom-color:var(--blue);}
-  .proof .fname{
-    color:var(--text2);max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    cursor:pointer;
-  }
-  .proof .fname:hover{color:var(--blue);}
-  .proof .fx{color:var(--text4);cursor:pointer;font-style:normal;flex:none;}
-  .proof .fx:hover{color:var(--red);}
+  .pbtn.empty{background:#f5f7fa;color:var(--text3);}
+  .pbtn:hover{background:#e2ecff;}
+  .pbtn.empty:hover{color:var(--blue);background:var(--blue-l);}
+  .pbtn .num{font-weight:600;}
+  .trow.bad .pbtn{box-shadow:0 0 0 1px var(--red);}
 
   .ops{text-align:center;}
   .ops a{font-size:12px;color:var(--text3);cursor:pointer;}
@@ -143,18 +135,30 @@
   .ops a.dis{color:var(--text4);cursor:not-allowed;}
   .ops a.dis:hover{color:var(--text4);}
 
-  .errline{
-    grid-column:1 / -1;padding:0 0 6px;font-size:12px;color:var(--red);display:none;
+  /* 凭证展开区 */
+  .pfr{
+    display:none;flex-wrap:wrap;gap:6px;align-items:center;
+    padding:8px 12px 10px;background:#fafcff;border-bottom:1px solid var(--border-l);
   }
-  .trow.bad .amt input,.trow.bad .mi select{border-color:var(--red);}
+  .pfr.open{display:flex;}
+  .fchip{
+    display:inline-flex;align-items:center;gap:6px;max-width:230px;height:24px;padding:0 7px;
+    background:#eef3fd;color:#2b6cd4;border-radius:3px;font-size:12px;
+  }
+  .fchip .fn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .fchip i{font-style:normal;color:#8ba7d6;cursor:pointer;flex:none;}
+  .fchip i:hover{color:var(--red);}
+  .fadd{font-size:12px;color:var(--blue);cursor:pointer;padding:0 4px;}
+  .fadd:hover{text-decoration:underline;}
+  .fadd.dis{color:var(--text4);cursor:not-allowed;text-decoration:none;}
+  .pempty{font-size:12px;color:var(--text4);}
 
   .addrow{display:flex;align-items:center;gap:16px;padding:10px 2px 2px;}
-  .addrow .fhint{margin-left:auto;font-size:12px;color:var(--text3);line-height:18px;}
   .addrow a{font-size:13px;color:var(--blue);cursor:pointer;}
   .addrow a:hover{text-decoration:underline;}
   .addrow a.dis{color:var(--text4);cursor:not-allowed;text-decoration:none;}
+  .addrow .fhint{margin-left:auto;font-size:12px;color:var(--text3);line-height:18px;}
 
-  /* 合计 / 手机 / 验证码 */
   .sumbar{
     display:flex;align-items:center;gap:18px;flex-wrap:wrap;
     margin-top:14px;padding:12px 14px;border-radius:6px;background:#fbfcfe;border:1px solid var(--border-l);
@@ -162,13 +166,11 @@
   .sumbar .sum{font-size:13px;color:var(--text2);}
   .sumbar .sum b{color:var(--text);}
   .sumbar .sum .money{color:var(--red);font-size:15px;font-weight:600;letter-spacing:.2px;}
+  .sumbar .sum .sub{font-size:12px;color:var(--text3);margin-left:6px;}
   .sumbar .phone{font-size:13px;color:var(--text2);}
   .sumbar .phone b{color:var(--text);font-weight:500;}
   .sumbar .code{margin-left:auto;display:flex;align-items:center;gap:8px;}
-  .code input{
-    width:170px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:4px;
-    font-size:13px;outline:none;
-  }
+  .code input{width:170px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:4px;font-size:13px;outline:none;}
   .code input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,119,255,.1);}
   .code button{
     height:32px;padding:0 14px;border:1px solid var(--blue);border-radius:4px;
@@ -182,20 +184,47 @@
     display:flex;align-items:center;justify-content:flex-end;gap:10px;
     border-top:1px solid var(--border-l);background:#fcfcfd;
   }
-  .btn{
-    height:34px;padding:0 18px;border:1px solid var(--border);border-radius:4px;
-    background:#fff;color:var(--text);font-size:13px;cursor:pointer;
-  }
-  .btn:hover{border-color:var(--blue);color:var(--blue);}
-  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
-  .btn.primary:hover{background:var(--blue-d);border-color:var(--blue-d);color:#fff;}
 
-  /* toast */
+  /* 商户搜索浮层 */
+  .mpop{
+    position:fixed;z-index:80;display:none;width:330px;
+    background:#fff;border-radius:6px;box-shadow:0 8px 28px rgba(20,30,48,.18);
+    border:1px solid var(--border);overflow:hidden;
+  }
+  .mpop.open{display:block;}
+  .mpop .q{width:100%;height:36px;border:0;border-bottom:1px solid var(--border-l);padding:0 12px;font-size:13px;outline:none;}
+  .mlist{max-height:250px;overflow:auto;padding:4px;}
+  .mitem{
+    display:flex;align-items:center;gap:8px;height:34px;padding:0 8px;border-radius:4px;cursor:pointer;font-size:13px;
+  }
+  .mitem:hover{background:#f5f8ff;}
+  .mitem .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mitem .mid{color:var(--text3);font-size:12px;font-variant-numeric:tabular-nums;}
+  .mitem .g{color:var(--text3);font-size:11px;white-space:nowrap;}
+  .mitem.dis{color:var(--text4);cursor:not-allowed;background:#fafbfc;}
+  .mitem.dis:hover{background:#fafbfc;}
+  .mitem .cur{color:var(--text4);font-size:11px;}
+  .mpop .none{padding:14px 12px;font-size:12px;color:var(--text3);text-align:center;}
+
+  /* 二次确认 */
+  .cfm-mask{
+    position:fixed;inset:0;background:rgba(23,32,48,.35);display:none;
+    align-items:center;justify-content:center;z-index:70;
+  }
+  .cfm-mask.open{display:flex;}
+  .cfm{
+    width:440px;max-width:92vw;background:#fff;border-radius:8px;overflow:hidden;
+    box-shadow:0 16px 48px rgba(20,30,48,.24);
+  }
+  .cfm-hd{height:50px;display:flex;align-items:center;padding:0 20px;font-size:15px;font-weight:600;border-bottom:1px solid var(--border-l);}
+  .cfm-bd{padding:18px 20px;font-size:13px;color:var(--text2);line-height:22px;}
+  .cfm-bd b{color:var(--text);}
+  .cfm-ft{padding:12px 20px 16px;display:flex;justify-content:flex-end;gap:10px;}
+
   .toast{
     position:fixed;top:26px;left:50%;transform:translateX(-50%) translateY(-8px);
     background:rgba(31,35,41,.92);color:#fff;font-size:13px;line-height:20px;
-    padding:9px 16px;border-radius:6px;opacity:0;pointer-events:none;transition:.18s;z-index:90;
-    max-width:70vw;
+    padding:9px 16px;border-radius:6px;opacity:0;pointer-events:none;transition:.18s;z-index:90;max-width:70vw;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .toast.ok{background:rgba(18,161,80,.95);}
@@ -205,12 +234,13 @@
 <body>
 <div class="page">
   <div class="page-hd">
-    <b>批量扣款弹窗</b><span class="sep">/</span><span>营销中心 · 金币管理 · 扣款申请</span>
+    <b>批量扣款弹窗</b><span class="sep">/</span><span>供应链管理后台 · 资金管理</span>
     <span class="spacer"></span>
-    <span style="font-size:12px;color:#8a94a6">金币仅支持单笔；账户余额支持批量</span>
+    <span class="tip">按定稿规则实现：金币支持批量 · 凭证多文件 · 单批 ≤20 行</span>
   </div>
   <div class="page-bd">
-    <button class="reopen" id="reopen">打开批量扣款弹窗</button>
+    <button class="btn primary" id="open3">列表勾选 3 家 → 打开（带入明细）</button>
+    <button class="btn" id="open0">不勾选 → 打开（空表）</button>
   </div>
 </div>
 
@@ -219,19 +249,17 @@
   <div class="dlg" role="dialog" aria-label="批量扣款">
     <div class="dlg-hd">
       <h3>批量扣款</h3>
-      <span class="cnt">共 <b id="merchantCnt">3</b> 个商户</span>
+      <span class="cnt">共 <b id="merchantCnt">0</b> 个商户</span>
       <button class="x" id="close" title="关闭">&times;</button>
     </div>
 
-    <div class="dlg-bd">
-      <!-- 批次级设置 -->
+    <div class="dlg-bd" id="dlgBd">
       <div class="typebar">
         <span class="lb">扣款类型：</span>
         <label class="radio"><input type="radio" name="payType" value="balance" checked><span>账户余额</span></label>
-        <label class="radio" id="goldLab"><input type="radio" name="payType" value="gold"><span>金币</span><em>（仅支持单笔）</em></label>
+        <label class="radio"><input type="radio" name="payType" value="gold"><span>金币</span></label>
       </div>
 
-      <!-- 明细表 -->
       <div class="tbl">
         <div class="trow thead">
           <span>商户名称</span>
@@ -245,12 +273,11 @@
 
       <div class="addrow">
         <a id="addRow">+ 添加一行</a>
-        <span class="fhint">付款凭证支持 Word、PDF、Excel、TXT 等格式文件或图片，单个文件不超过 10MB</span>
+        <span class="fhint">付款凭证支持图片 / PDF / Word / Excel / TXT，单个 ≤10MB，每行最多 10 个，单批最多 20 行</span>
       </div>
 
-      <!-- 合计 + 手机 + 验证码 -->
       <div class="sumbar">
-        <span class="sum">合计 <b id="rowCnt">3</b> 笔，<span class="money" id="sumMoney">¥6,000.00</span></span>
+        <span class="sum">共 <b id="rowCnt">0</b> 笔，合计 <span class="money" id="sumMoney">¥0.00</span><span class="sub" id="sumSub"></span></span>
         <span class="phone">登录手机 <b>186****6591</b></span>
         <span class="code">
           <input id="code" maxlength="6" inputmode="numeric" placeholder="请输入验证码">
@@ -266,85 +293,132 @@
   </div>
 </div>
 
-<input type="file" id="fileInput" style="display:none">
+<!-- 商户搜索浮层 -->
+<div class="mpop" id="mpop">
+  <input class="q" id="mpopQ" placeholder="搜索商户名称 / 商户 ID">
+  <div class="mlist" id="mpopList"></div>
+</div>
+
+<!-- 二次确认 -->
+<div class="cfm-mask" id="cfmMask">
+  <div class="cfm">
+    <div class="cfm-hd">确认提交</div>
+    <div class="cfm-bd" id="cfmText"></div>
+    <div class="cfm-ft">
+      <button class="btn" id="cfmCancel">取消</button>
+      <button class="btn primary" id="cfmOk">确认提交</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" multiple style="display:none">
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
   'use strict';
 
-  /* ---------------- 数据 ---------------- */
+  var MAX_ROWS = 20, MAX_FILES = 10, MAX_SIZE = 10 * 1024 * 1024, MAX_AMOUNT = 1000000;
+
+  /* ---------------- 商户（名称/ID 取真实后台，金币与余额为演示数据） ---------------- */
   var MERCHANTS = [
-    { mid:'100006549', name:'无锡点触' },
-    { mid:'100001527', name:'大黄鹅自动售货机' },
-    { mid:'100001987', name:'大黄鹅' },
-    { mid:'100023310', name:'有效期测试' },
-    { mid:'100004821', name:'乐科智控' }
+    { mid:'100006549', name:'无锡点触',                  gold:12000, bal:25680.00 },
+    { mid:'100001527', name:'大黄鹅自动售货机',          gold: 5600, bal:12300.50 },
+    { mid:'100001987', name:'大黄鹅',                    gold:28000, bal:64210.00 },
+    { mid:'100002218', name:'有效期测试',                gold: 1200, bal:  980.00 },
+    { mid:'100001917', name:'国庆商户啦啦啦',            gold:  800, bal: 3100.00 },
+    { mid:'100020854', name:'大黄鹅无人便利店',          gold: 9600, bal:18760.00 },
+    { mid:'100021091', name:'大黄鹅(临沂)科技有限公司',   gold: 4300, bal: 5200.00 },
+    { mid:'100000528', name:'大黄鹅自动售货机(旧)',      gold:  600, bal:  760.00 },
+    { mid:'100000531', name:'大黄鹅测试A2',              gold: 2400, bal: 4100.00 },
+    { mid:'100000508', name:'大黄鹅雄霸天下',            gold:  150, bal:  320.00 },
+    { mid:'100000194', name:'12312312dfs',               gold:    0, bal:   50.00 },
+    { mid:'100001545', name:'小王随行付测试',            gold: 3600, bal: 2280.00 },
+    { mid:'100001588', name:'乐科智控',                  gold:15400, bal:30220.00 },
+    { mid:'100001602', name:'深圳湾科技园一号店',        gold: 7200, bal:11400.00 },
+    { mid:'100001633', name:'杭州天成贸易',              gold: 3100, bal: 4600.00 },
+    { mid:'100001701', name:'东莞新和仓储',              gold: 8700, bal: 9900.00 },
+    { mid:'100001744', name:'上海鼎丰食品',              gold: 5400, bal:13200.00 },
+    { mid:'100001802', name:'广州百汇商贸',              gold: 2600, bal: 3400.00 },
+    { mid:'100001866', name:'成都锦里文旅',              gold: 4100, bal: 5600.00 },
+    { mid:'100001903', name:'武汉光谷创业街',            gold: 1900, bal: 2700.00 },
+    { mid:'100001955', name:'西安大唐不夜城',            gold: 6300, bal: 8800.00 },
+    { mid:'100002004', name:'南京新街口地铁站',          gold: 2200, bal: 3600.00 },
+    { mid:'100002077', name:'苏州工业园B区',             gold: 4800, bal: 6100.00 },
+    { mid:'100002133', name:'重庆解放碑步行街',          gold: 3300, bal: 4400.00 }
   ];
-  var rows = [
-    { mid:'100006549', amount:'2000.00', note:'8月货款冲抵', file:'' },
-    { mid:'100001527', amount:'1500.00', note:'',            file:'凭证.pdf' },
-    { mid:'100001987', amount:'2500.00', note:'',            file:'' }
-  ];
+
+  var rows = [];
   var payType = 'balance';
+  var openProofFor = -1;
   var codeSent = false, countdown = 0, timer = null;
   var filePickFor = -1;
+  var popRow = -1;
 
   function $(id){ return document.getElementById(id); }
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"]/g, function(c){
     return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c];
   }); }
-  function mname(mid){
-    for (var i=0;i<MERCHANTS.length;i++) if (MERCHANTS[i].mid === mid) return MERCHANTS[i].name;
-    return '';
-  }
-  function num(v){
-    var n = parseFloat(String(v == null ? '' : v).replace(/,/g,''));
-    return isNaN(n) ? 0 : n;
-  }
-  function money(n){
-    return '¥' + n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
-  }
+  function byMid(mid){ for (var i=0;i<MERCHANTS.length;i++) if (MERCHANTS[i].mid===mid) return MERCHANTS[i]; return null; }
+  function num(v){ var n = parseFloat(String(v==null?'':v).replace(/,/g,'')); return isNaN(n)?0:n; }
+  function money(n){ return '¥' + n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function n2(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
   var toastTimer = null;
   function toast(msg, kind){
     var t = $('toast');
     t.textContent = msg;
     t.className = 'toast show' + (kind ? ' ' + kind : '');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ t.className = 'toast'; }, 2600);
+    toastTimer = setTimeout(function(){ t.className = 'toast'; }, 2800);
   }
+
+  /* ---------------- 计算 ---------------- */
+  function rowValid(r){ return !!r.mid && num(r.amount) > 0 && r.files.length > 0; }
+  function effectiveRows(){ return rows.filter(rowValid); }
+  function sumAmount(){ return effectiveRows().reduce(function(a,r){ return a + num(r.amount); }, 0); }
 
   /* ---------------- 渲染 ---------------- */
-  function usedMids(exceptIdx){
-    return rows.map(function(r, i){ return i === exceptIdx ? null : r.mid; }).filter(Boolean);
-  }
-
   function rowHtml(r, i){
-    var used = usedMids(i);
-    var opts = MERCHANTS.map(function(m){
-      var dis = used.indexOf(m.mid) > -1 ? ' disabled' : '';
-      var sel = m.mid === r.mid ? ' selected' : '';
-      return '<option value="' + m.mid + '"' + sel + dis + '>' + esc(m.name + '(' + m.mid + ')') + '</option>';
-    }).join('');
-
-    var proof = r.file
-      ? '<span class="fname" data-file="' + i + '" title="' + esc(r.file) + '">' + esc(r.file) + '</span>' +
-        '<i class="fx" data-delfile="' + i + '" title="移除">&times;</i>'
-      : '<span class="up" data-up="' + i + '">上传</span>';
-
+    var m = byMid(r.mid);
     var canDel = rows.length > 1;
 
+    var proof = r.files.length
+      ? '<span class="pbtn" data-proof="' + i + '">📎 <span class="num">' + r.files.length + '</span> 个凭证' +
+        '<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6">' +
+        '<path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+      : '<span class="pbtn empty" data-proof="' + i + '">上传</span>';
+
+    var ph = payType === 'gold' ? (m ? ('最多 ' + n2(m.gold)) : '最多金币余额') : '请输入';
+
     return '<div class="trow" data-i="' + i + '">' +
-             '<div class="mi"><select data-f="mid" data-i="' + i + '">' +
-               '<option value="">请选择商户</option>' + opts +
-             '</select></div>' +
+             '<div class="mi">' +
+               '<div class="msel" data-sel="' + i + '">' +
+                 '<span class="t' + (m ? '' : ' ph') + '">' + (m ? esc(m.name + '(' + m.mid + ')') : '请选择商户') + '</span>' +
+                 '<svg class="cg" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">' +
+                 '<path d="M2.5 4.5L6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+               '</div>' +
+             '</div>' +
              '<div class="amt"><span class="cur">¥</span>' +
-               '<input data-f="amount" data-i="' + i + '" value="' + esc(r.amount) + '" placeholder="请输入" inputmode="decimal">' +
+               '<input data-f="amount" data-i="' + i + '" value="' + esc(r.amount) + '" placeholder="' + ph + '" inputmode="decimal">' +
              '</div>' +
              '<div class="note"><input data-f="note" data-i="' + i + '" value="' + esc(r.note) + '" maxlength="100" placeholder="选填，最多 100 字"></div>' +
              '<div class="proof">' + proof + '</div>' +
              '<div class="ops"><a data-del="' + i + '" class="' + (canDel ? '' : 'dis') + '">删除</a></div>' +
-           '</div>';
+           '</div>' +
+           '<div class="pfr' + (openProofFor === i ? ' open' : '') + '" data-pfr="' + i + '">' + proofFiles(r, i) + '</div>';
+  }
+
+  function proofFiles(r, i){
+    var chips = r.files.map(function(f, k){
+      return '<span class="fchip" title="' + esc(f.name) + '">' +
+               '<span class="fn">' + esc(f.name) + '</span>' +
+               '<i data-rfile="' + i + ':' + k + '" title="移除">&times;</i></span>';
+    }).join('');
+    var full = r.files.length >= MAX_FILES;
+    var add = '<span class="fadd' + (full ? ' dis' : '') + '" data-addfile="' + i + '">' +
+                (full ? '已达 10 个上限' : ('+ 添加凭证 ' + r.files.length + '/' + MAX_FILES)) + '</span>';
+    return (chips || '<span class="pempty">未上传凭证，至少需 1 个</span>') + add;
   }
 
   function render(){
@@ -354,64 +428,103 @@
   }
 
   function recalc(){
-    var sum = rows.reduce(function(a, r){ return a + num(r.amount); }, 0);
-    $('rowCnt').textContent = rows.length;
+    var eff = effectiveRows(), sum = sumAmount();
+    $('rowCnt').textContent = eff.length;
     $('merchantCnt').textContent = rows.length;
     $('sumMoney').textContent = money(sum);
+    var skip = rows.length - eff.length;
+    $('sumSub').textContent = skip > 0 ? ('（另有 ' + skip + ' 行未填金额或未传凭证，不计入合计）') : '';
   }
 
   function syncAdd(){
-    var a = $('addRow'), full = rows.length >= MERCHANTS.length, gold = payType === 'gold';
-    var dis = full || gold;
-    a.classList.toggle('dis', dis);
-    a.title = gold ? '金币扣款仅支持单笔' : (full ? '商户已全部加入' : '');
+    var a = $('addRow'), full = rows.length >= MAX_ROWS;
+    a.classList.toggle('dis', full);
+    a.title = full ? ('单批最多 ' + MAX_ROWS + ' 行') : '';
   }
 
   /* ---------------- 行操作 ---------------- */
   function addRow(){
-    if (payType === 'gold') return toast('金币扣款仅支持单笔，不能添加多行', 'err');
-    if (rows.length >= MERCHANTS.length) return toast('商户已全部加入', 'err');
-    var used = usedMids(-1);
-    var free = MERCHANTS.filter(function(m){ return used.indexOf(m.mid) < 0; })[0];
-    rows.push({ mid: free ? free.mid : '', amount:'', note:'', file:'' });
+    if (rows.length >= MAX_ROWS) return toast('单批最多 ' + MAX_ROWS + ' 行', 'err');
+    rows.push({ mid:'', amount:'', note:'', files:[] });
+    openProofFor = -1;
     render();
-    var last = document.querySelector('#tbody .trow:last-child .note input');
-    if (last) last.focus();
+    openPop(rows.length - 1);
   }
   function delRow(i){
     if (rows.length <= 1) return toast('至少保留一行', 'err');
     rows.splice(i, 1);
+    if (openProofFor === i) openProofFor = -1;
+    else if (openProofFor > i) openProofFor--;
     render();
   }
 
-  /* ---------------- 事件 ---------------- */
-  $('addRow').addEventListener('click', function(){
-    if (this.classList.contains('dis')) {
-      return payType === 'gold' ? toast('金币扣款仅支持单笔，不能添加多行', 'err') : toast('商户已全部加入', 'err');
-    }
-    addRow();
-  });
+  /* ---------------- 商户搜索浮层 ---------------- */
+  function openPop(i){
+    popRow = i;
+    var cell = document.querySelector('.msel[data-sel="' + i + '"]');
+    if (!cell) return;
+    var r = cell.getBoundingClientRect();
+    var pop = $('mpop');
+    pop.classList.add('open');
+    var left = Math.min(r.left, window.innerWidth - 346);
+    pop.style.left = Math.round(Math.max(12, left)) + 'px';
+    pop.style.top = Math.round(r.bottom + 4) + 'px';
+    $('mpopQ').value = '';
+    renderPopList('');
+    setTimeout(function(){ $('mpopQ').focus(); }, 0);
+  }
+  function closePop(){ $('mpop').classList.remove('open'); popRow = -1; }
 
+  function renderPopList(q){
+    var used = rows.filter(function(x,j){ return j !== popRow && x.mid; }).map(function(x){ return x.mid; });
+    var key = String(q || '').trim().toLowerCase();
+    var list = MERCHANTS.filter(function(m){
+      if (!key) return true;
+      return m.name.toLowerCase().indexOf(key) > -1 || m.mid.indexOf(key) > -1;
+    });
+    if (!list.length) { $('mpopList').innerHTML = '<div class="none">没有匹配的商户</div>'; return; }
+    $('mpopList').innerHTML = list.map(function(m){
+      var dis = used.indexOf(m.mid) > -1;
+      return '<div class="mitem' + (dis ? ' dis' : '') + '" data-pick="' + m.mid + '">' +
+               '<span class="nm">' + esc(m.name) + '</span>' +
+               '<span class="mid">' + m.mid + '</span>' +
+               '<span class="g">金币 ' + m.gold.toLocaleString('en-US') + '</span>' +
+               (dis ? '<span class="cur">已添加</span>' : '') +
+             '</div>';
+    }).join('');
+  }
+
+  /* ---------------- 表格事件 ---------------- */
   $('tbody').addEventListener('click', function(e){
+    var sel = e.target.closest('[data-sel]');
+    if (sel) { e.stopPropagation(); openPop(+sel.dataset.sel); return; }
+
     var del = e.target.closest('[data-del]');
     if (del) {
       if (del.classList.contains('dis')) return toast('至少保留一行', 'err');
       return delRow(+del.dataset.del);
     }
-    var up = e.target.closest('[data-up]');
-    if (up) {
-      filePickFor = +up.dataset.up;
+
+    var pb = e.target.closest('[data-proof]');
+    if (pb) { var pi = +pb.dataset.proof; openProofFor = (openProofFor === pi ? -1 : pi); render(); return; }
+
+    var rf = e.target.closest('[data-rfile]');
+    if (rf) {
+      var a = rf.dataset.rfile.split(':');
+      rows[+a[0]].files.splice(+a[1], 1);
+      render();
+      return;
+    }
+
+    var af = e.target.closest('[data-addfile]');
+    if (af) {
+      var idx = +af.dataset.addfile;
+      if (rows[idx].files.length >= MAX_FILES) return toast('每行最多 ' + MAX_FILES + ' 个凭证', 'err');
+      filePickFor = idx;
       $('fileInput').value = '';
       $('fileInput').click();
       return;
     }
-    var fx = e.target.closest('[data-delfile]');
-    if (fx) {
-      rows[+fx.dataset.delfile].file = '';
-      return render();
-    }
-    var fn = e.target.closest('[data-file]');
-    if (fn) { toast('原型演示：不打开真实文件'); return; }
   });
 
   $('tbody').addEventListener('input', function(e){
@@ -421,22 +534,17 @@
     if (!rows[i]) return;
     rows[i][f] = el.value;
     if (f === 'amount') {
-      el.closest('.trow').classList.remove('bad');
+      var tr = el.closest('.trow');
+      tr.classList.remove('bad');
+      /* 金币类型：超过该商户当前金币余额即时标红，不必等提交 */
+      if (payType === 'gold') {
+        var mm = byMid(rows[i].mid);
+        if (mm && num(el.value) > mm.gold) tr.classList.add('bad');
+      }
       recalc();
     }
   });
 
-  $('tbody').addEventListener('change', function(e){
-    var el = e.target, f = el.dataset.f;
-    if (!f) return;
-    var i = +el.dataset.i;
-    if (!rows[i]) return;
-    rows[i][f] = el.value;
-    el.closest('.trow').classList.remove('bad');
-    if (f === 'mid') render();   /* 重排选项的禁用态 */
-  });
-
-  /* 金额失焦格式化 */
   $('tbody').addEventListener('blur', function(e){
     var el = e.target;
     if (el.dataset.f !== 'amount') return;
@@ -445,32 +553,62 @@
     var v = el.value.trim();
     if (!v) return;
     var n = num(v);
-    if (n > 0) { el.value = n.toFixed(2); rows[i].amount = el.value; recalc(); }
+    if (n > 0) { el.value = n2(n).replace(/,/g,''); rows[i].amount = el.value; recalc(); }
   }, true);
 
+  $('addRow').addEventListener('click', function(){
+    if (this.classList.contains('dis')) return toast('单批最多 ' + MAX_ROWS + ' 行', 'err');
+    addRow();
+  });
+
+  /* ---------------- 商户浮层事件 ---------------- */
+  $('mpopQ').addEventListener('input', function(){ renderPopList(this.value); });
+  $('mpopList').addEventListener('click', function(e){
+    var it = e.target.closest('[data-pick]');
+    if (!it || it.classList.contains('dis') || popRow < 0) return;
+    var m = byMid(it.dataset.pick);
+    if (!m) return;
+    rows[popRow].mid = m.mid;
+    closePop();
+    render();
+  });
+  document.addEventListener('click', function(e){
+    /* 点「+ 添加一行」会在本轮回调里刚打开浮层，不要被这里关掉 */
+    if (e.target.closest('#addRow')) return;
+    if (!e.target.closest('#mpop') && !e.target.closest('[data-sel]')) closePop();
+  });
+  $('dlgBd').addEventListener('scroll', closePop);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      if ($('mpop').classList.contains('open')) closePop();
+      else if ($('cfmMask').classList.contains('open')) $('cfmMask').classList.remove('open');
+      else close();
+    }
+  });
+
+  /* ---------------- 文件 ---------------- */
   $('fileInput').addEventListener('change', function(){
-    var f = this.files && this.files[0];
-    if (!f || filePickFor < 0 || !rows[filePickFor]) return;
-    var name = f.name;
-    if (f.size > 10 * 1024 * 1024) { toast('文件不能超过 10MB', 'err'); return; }
-    rows[filePickFor].file = name;
+    var fl = Array.prototype.slice.call(this.files || []);
+    if (!fl.length || filePickFor < 0 || !rows[filePickFor]) return;
+    var row = rows[filePickFor];
+    var over = fl.filter(function(f){ return f.size > MAX_SIZE; });
+    if (over.length) {
+      toast('「' + over[0].name + '」超过 10MB，已拦截', 'err');
+      fl = fl.filter(function(f){ return f.size <= MAX_SIZE; });
+    }
+    var room = MAX_FILES - row.files.length;
+    if (fl.length > room) {
+      toast('每行最多 ' + MAX_FILES + ' 个凭证，本次只接收前 ' + Math.max(room, 0) + ' 个', 'err');
+      fl = fl.slice(0, Math.max(room, 0));
+    }
+    fl.forEach(function(f){ row.files.push({ name:f.name, size:f.size }); });
     filePickFor = -1;
     render();
   });
 
   /* ---------------- 扣款类型 ---------------- */
   Array.prototype.forEach.call(document.querySelectorAll('input[name=payType]'), function(r){
-    r.addEventListener('change', function(){
-      if (this.value === 'gold' && rows.length > 1) {
-        toast('金币扣款仅支持单笔，请先删除多余行', 'err');
-        document.querySelector('input[name=payType][value=balance]').checked = true;
-        payType = 'balance';
-        syncAdd();
-        return;
-      }
-      payType = this.value;
-      syncAdd();
-    });
+    r.addEventListener('change', function(){ payType = this.value; render(); });
   });
 
   /* ---------------- 验证码 ---------------- */
@@ -482,19 +620,15 @@
     btn.textContent = countdown + 's 后重发';
     timer = setInterval(function(){
       countdown--;
-      if (countdown <= 0) {
-        clearInterval(timer);
-        btn.disabled = false;
-        btn.textContent = '获取验证码';
-        return;
-      }
+      if (countdown <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = '获取验证码'; return; }
       btn.textContent = countdown + 's 后重发';
     }, 1000);
     toast('验证码已发送（演示码 123456）');
   });
 
-  /* ---------------- 提交校验 ---------------- */
+  /* ---------------- 校验 ---------------- */
   function fail(i, msg){
+    document.querySelectorAll('#tbody .trow.bad').forEach(function(x){ x.classList.remove('bad'); });
     var tr = document.querySelector('#tbody .trow[data-i="' + i + '"]');
     if (tr) {
       tr.classList.add('bad');
@@ -506,24 +640,29 @@
 
   function validate(){
     if (!rows.length) { toast('请至少添加一行', 'err'); return false; }
-    if (payType === 'gold' && rows.length > 1) { toast('金币扣款仅支持单笔', 'err'); return false; }
-
     var seen = {};
     for (var i = 0; i < rows.length; i++) {
-      var r = rows[i];
-      if (!r.mid) return fail(i, '第 ' + (i + 1) + ' 行：请选择商户');
-      if (seen[r.mid]) return fail(i, '第 ' + (i + 1) + ' 行：商户重复');
+      var r = rows[i], ln = '第 ' + (i + 1) + ' 行：';
+      if (!r.mid) return fail(i, ln + '请选择商户');
+      if (seen[r.mid]) return fail(i, ln + '商户重复，同批不可重复扣款');
       seen[r.mid] = 1;
 
       var v = String(r.amount == null ? '' : r.amount).trim();
-      if (!v) return fail(i, '第 ' + (i + 1) + ' 行：请填写扣款金额');
-      if (!/^\d+(\.\d{1,2})?$/.test(v)) return fail(i, '第 ' + (i + 1) + ' 行：金额最多两位小数');
-      if (num(v) <= 0) return fail(i, '第 ' + (i + 1) + ' 行：扣款金额需大于 0');
-      if (String(r.note || '').length > 100) return fail(i, '第 ' + (i + 1) + ' 行：备注不能超过 100 字');
-    }
+      if (!v) return fail(i, ln + '请填写扣款金额');
+      if (!/^\d+(\.\d{1,2})?$/.test(v)) return fail(i, ln + '金额最多两位小数');
+      if (num(v) <= 0) return fail(i, ln + '扣款金额需大于 0');
+      if (num(v) > MAX_AMOUNT) return fail(i, ln + '单笔扣款金额不能超过 ¥1,000,000.00');
 
-    var sum = rows.reduce(function(a, r){ return a + num(r.amount); }, 0);
-    if (sum > 1000000) { toast('合计金额不能超过 ¥1,000,000.00', 'err'); return false; }
+      if (payType === 'gold') {
+        var m = byMid(r.mid);
+        if (m && num(v) > m.gold) {
+          return fail(i, ln + '扣款金币数超过该商户当前金币余额（' + m.gold.toLocaleString('en-US') + '）');
+        }
+      }
+
+      if (!r.files.length) return fail(i, ln + '请上传至少 1 个付款凭证');
+      if (r.files.length > MAX_FILES) return fail(i, ln + '付款凭证最多 ' + MAX_FILES + ' 个');
+    }
 
     var c = $('code').value.trim();
     if (!codeSent) { $('code').focus(); toast('请先获取验证码', 'err'); return false; }
@@ -532,18 +671,39 @@
     return true;
   }
 
+  /* ---------------- 提交（二次确认） ---------------- */
   $('submit').addEventListener('click', function(){
     if (!validate()) return;
-    var sum = rows.reduce(function(a, r){ return a + num(r.amount); }, 0);
-    toast('已提交 ' + rows.length + ' 笔扣款申请，合计 ' + money(sum), 'ok');
-    setTimeout(function(){ close(); resetForm(); }, 900);
+    var n = rows.length, sum = sumAmount();
+    $('cfmText').innerHTML = '确认对 <b>' + n + ' 个商户</b>提交扣款申请，合计 <b>' + money(sum) + '</b>？' +
+      '<br>提交后需审核，' + (payType === 'gold' ? '金币' : '余额') + '不会立即扣减。';
+    $('cfmMask').classList.add('open');
+  });
+  $('cfmCancel').addEventListener('click', function(){ $('cfmMask').classList.remove('open'); });
+  $('cfmMask').addEventListener('click', function(e){ if (e.target === this) this.classList.remove('open'); });
+  $('cfmOk').addEventListener('click', function(){
+    $('cfmMask').classList.remove('open');
+    var n = rows.length, sum = sumAmount();
+    toast('已提交 ' + n + ' 笔扣款申请，合计 ' + money(sum) + '，等待审核', 'ok');
+    setTimeout(function(){
+      close();
+      reset(['100006549','100001527','100001987']);
+    }, 900);
   });
 
-  /* 提交成功后复位，下次进来是新的空表单 */
-  function resetForm(){
-    rows = [{ mid: MERCHANTS[0].mid, amount:'', note:'', file:'' }];
+  /* ---------------- 开关 / 复位 ---------------- */
+  function reset(mids){
+    var list = (mids && mids.length) ? mids : [''];
+    rows = list.map(function(mid){
+      var m = byMid(mid);
+      return {
+        mid: mid || '', amount:'', note:'',
+        files: m ? [{ name:'付款凭证-' + m.mid + '.pdf', size:102400 }] : []
+      };
+    });
     payType = 'balance';
     document.querySelector('input[name=payType][value=balance]').checked = true;
+    openProofFor = -1;
     codeSent = false;
     clearInterval(timer);
     countdown = 0;
@@ -552,22 +712,21 @@
     $('code').value = '';
     render();
   }
-
-  /* ---------------- 开关 ---------------- */
-  function open(){
-    $('mask').classList.add('open');
-    render();
+  function open(mids){ reset(mids); $('mask').classList.add('open'); closePop(); }
+  function close(){
+    $('mask').classList.remove('open');
+    $('cfmMask').classList.remove('open');
+    closePop();
   }
-  function close(){ $('mask').classList.remove('open'); }
 
-  $('reopen').addEventListener('click', open);
+  $('open3').addEventListener('click', function(){ open(['100006549','100001527','100001987']); });
+  $('open0').addEventListener('click', function(){ open([]); });
   $('close').addEventListener('click', close);
   $('cancel').addEventListener('click', close);
   $('mask').addEventListener('click', function(e){ if (e.target === this) close(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
 
-  /* 首屏直接打开 */
-  open();
+  /* 首屏：默认带入 3 个商户 */
+  open(['100006549','100001527','100001987']);
 })();
 </script>
 </body>
